@@ -1,0 +1,70 @@
+spring:
+  rocketmq:
+    name-servers: toobit-mq-1:9876;toobit-mq-2:9876
+    producer-group: bb-producer-group
+  redis:
+    cluster:
+      nodes:
+        - toobit-redis:6379
+  datasource:
+    url: jdbc:mysql://toobit-db-bbserver:3306/bb_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
+    password: 0YvoGUzwhumnf2KGQvjN
+    ro:
+      url: jdbc:mysql://toobit-db-bbserver-ro:3306/bb_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
+      password: 0YvoGUzwhumnf2KGQvjN
+    gateway:
+      jdbc-url: "jdbc:mysql://toobit-db-trade:3306/gateway_exchange?socketTimeout=10000&&serverTimezone=UTC&characterEncoding=utf8&useUnicode=true&useSSL=false&s=shard&allowPublicKeyRetrieval=true"
+    offlineserver:
+      hikari:
+        jdbc-url: jdbc:mysql://toobit-db-offline:3306/offline_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+
+has:
+  zkAddress: toobit-zk-1:2181,toobit-zk-2:2181,toobit-zk-3:2181
+  useZkClient: true
+  useGrpcChannels: false
+  useMatchChannels: true
+
+bb:
+  redis-cluster:
+    shards:
+      - toobit-redis:6379
+  grpc-client:
+    list:
+      - name: bb-provider-new
+        host: bb-provider-new
+        port: 7013
+
+# nacos-config
+nacos:
+  config:
+    server-addr: toobit-nacos:8848
+    ext-config:
+      - data-id: biz.yaml
+        group: cross-biz
+        auto-refresh: true
+        server-addr: nacos.test.infra.be2pzzl3bhmz.tbinner.com:8848
+        type: yaml
+        username: nacos
+        password: nacos
+
+tbsc:
+  registry:
+    serverAddr: toobit-nacos:8848
+  consumer:
+    grpc:
+      grpc-client-channel-options:
+        executor-config:
+          client-worker-count: 10
+  provider:
+    grpcPort: 7013
+    grpc-server-options:
+      server-worker-count: 200
+      max-server-worker-count: 600
+      queue: 400
+
+sentinel:
+  rule:
+    flowLimitMap: {
+      "[io.bbex.base.account.OrderService/GetOrder]":{"grade":1,"count":0,"limitApp":"market-maker-test"},
+      "[io.bbex.base.account.OrderService/BatchCancelByIds]":{"grade":1,"count":50,"limitApp":"market-maker"},
+    }

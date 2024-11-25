@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="APP_NAME" value="bb-provider"/>
+    <contextName>${APP_NAME}</contextName>
+
+    <include resource="io/bbex/base/log/log-common.xml"/>
+
+    <appender name="APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/archives/${APP_NAME}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxHistory>${DEFAULT_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${DEFAULT_MAX_FILE_SIZE}</maxFileSize>
+            <totalSizeCap>${DEFAULT_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>
+                        {
+                        "time":"%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"}",
+                        "level":"%level",
+                        "thread":"%thread",
+                        "logger":"%logger",
+                        "message":"%message",
+                        "exception":"%ex"
+                        }
+                        %n
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC_APP" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="APP"/>
+        <queueSize>${DEFAULT_QUEUE_SIZE}</queueSize>
+        <maxFlushTime>${DEFAULT_FLUSH_TIME}</maxFlushTime>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_APP"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <appender name="STREAM_SUBSCRIBE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/stream_subscribe.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/archives/stream_subscribe.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxHistory>${DEFAULT_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${DEFAULT_MAX_FILE_SIZE}</maxFileSize>
+            <totalSizeCap>${DEFAULT_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>
+                        {
+                        "time":"%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"}",
+                        "level":"%level",
+                        "thread":"%thread",
+                        "logger":"%logger",
+                        "message":"%message",
+                        "exception":"%ex"
+                        }
+                        %n
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="DEPOSIT_NOTIFY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/deposit_notify.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/archives/deposit_notify.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxHistory>${DEFAULT_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${DEFAULT_MAX_FILE_SIZE}</maxFileSize>
+            <totalSizeCap>${DEFAULT_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>
+                        {
+                        "time":"%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"}",
+                        "level":"%level",
+                        "thread":"%thread",
+                        "logger":"%logger",
+                        "message":"%message",
+                        "exception":"%ex"
+                        }
+                        %n
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="CACHE_MANAGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/cache_manager.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/archives/cache_manager.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxHistory>${DEFAULT_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${DEFAULT_MAX_FILE_SIZE}</maxFileSize>
+            <totalSizeCap>${DEFAULT_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>
+                        {
+                        "time":"%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"}",
+                        "level":"%level",
+                        "thread":"%thread",
+                        "logger":"%logger",
+                        "message":"%message",
+                        "exception":"%ex"
+                        }
+                        %n
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <logger name="io.bbex.bb.server.cache.CacheManager" level="INFO" additivity="false">
+        <appender-ref ref="CACHE_MANAGER"/>
+    </logger>
+    <logger name="io.bbex.bb.server.schedule" level="INFO" additivity="false">
+        <appender-ref ref="CACHE_MANAGER"/>
+    </logger>
+
+    <logger name="io.bbex.bb.service.impl.bbLocalCacheServiceImpl" level="INFO" additivity="false">
+        <appender-ref ref="CACHE_MANAGER"/>
+    </logger>
+    <logger name="io.bbex.bb.schedule.bbCacheRefreshSchedule" level="INFO" additivity="false">
+        <appender-ref ref="CACHE_MANAGER"/>
+    </logger>
+
+    <logger name="io.bbex.bb.server.grpc.SubscribeServiceGrpcImpl" level="INFO" additivity="false">
+        <appender-ref ref="STREAM_SUBSCRIBE"/>
+    </logger>
+
+</configuration>

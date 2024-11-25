@@ -1,0 +1,109 @@
+spring:
+  application:
+    name: bb-provider-new
+  rocketmq:
+    name-servers: 10.21.5.107:9876
+    producer-group: bb-producer-group
+  redis:
+    lettuce:
+      pool:
+        max-active: 100
+        max-idle: 50
+        max-wait: 2s
+      cluster:
+        refresh:
+          adaptive: true
+          period: 20000
+    timeout: 5s
+    cluster:
+      nodes:
+        - public-rediscluster.j6pulq.clustercfg.apse1.cache.amazonaws.com:6379
+  datasource:
+    url: jdbc:mysql://public-rds.cluster-cnfhvxiqw61y.ap-southeast-1.rds.amazonaws.com:3306/bb_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: admin
+    password: 0YvoGUzwhumnf2KGQvjN
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 50
+      connectionInitSql: select 1 from dual
+      connection-timeout: 5000
+      idle-timeout: 6000
+      max-lifetime: 60000
+      validation-timeout: 5000
+      initialization-fail-timeout: 1
+      keepalive-time: 60000
+    ro:
+      username: admin
+    gateway:
+      url: jdbc:mysql://test-ex-rds.cluster-cnfhvxiqw61y.ap-southeast-1.rds.amazonaws.com:3306/gateway_exchange?serverTimezone=UTC&characterEncoding=utf8&useUnicode=true&useSSL=false
+      username: admin
+      password: 0YvoGUzwhumnf2KGQvjN
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 50
+        minimum-idle: 20
+        connectionInitSql: select 1 from dual
+        connection-timeout: 5000
+        idle-timeout: 6000
+        max-lifetime: 60000
+        validation-timeout: 5000
+        initialization-fail-timeout: 1
+        keepalive-time: 60000
+    offlineserver:
+      hikari:
+        jdbc-url: jdbc:mysql://db.test1.wcsbapp.com:3306/offline_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+        username: admin
+        password: 0YvoGUzwhumnf2KGQvjN
+        minimum-idle: 20
+        maximum-pool-size: 50
+        max-lifetime: 60000
+        connection-timeout: 5000
+        driver-class-name: com.mysql.cj.jdbc.Driver
+  tracing:
+    enableTracing: false
+    reporter.zipkin.url: http://127.0.0.1:9411/api/v2/spans
+
+grpc:
+  port: 7013
+  shortcuts:
+    bb-server: localhost:7011
+  client-worker-count: 20
+  server-worker-count: 100
+  channel-check-mode: 1
+  healthy-check-interval-in-sec: 1
+  wait-time-in-sec-to-kill-channel: 1
+
+
+server:
+  port: 7012
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-statement-timeout: 3
+
+bb:
+  redis-cluster:
+    shards:
+      - public-rediscluster.j6pulq.clustercfg.apse1.cache.amazonaws.com:6379
+
+  location: bitbili
+
+env:
+  # env of running: prod|test|benchmark
+  profile: test
+
+# nacos-config
+nacos:
+  config:
+    server-addr: nacos.test.infra.be2pzzl3bhmz.tbinner.com:8848
+    data-id: ${spring.application.name}.yaml
+    group: ${spring.application.name}
+    remote-first: true  #远程配置优先
+    autoRefresh: true #自动刷新
+    bootstrap:
+      enable: true  #在spring启动前拉取配置写入environment中
+    type: yaml
+    username: nacos
+    password: nacos

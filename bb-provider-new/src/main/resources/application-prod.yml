@@ -1,0 +1,131 @@
+spring:
+  application:
+    name: bb-server
+  rocketmq:
+    name-servers: 10.22.4.50:9876;10.22.4.230:9876
+    producer-group: bb-producer-group
+  redis:
+    lettuce:
+      pool:
+        max-active: 100
+        max-idle: 50
+        max-wait: 2s
+    timeout: 5s
+    cluster:
+      nodes:
+        - ex-redis:6379
+  datasource:
+    url: jdbc:mysql://ex-db-bbserver:3306/bb_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: prod_bbserver
+    password: "TB-ENC[Xb743ncnfh8mvMbOnScyRSlLcwYE5YgUKf/SZHqFlHO4dH+UvbigZbmFu9pz3fHGVkn5gqEKHZ/rILd/KwE5LvpxPjdujpjmH8U0ZhrLNo/K+l8iu1ankFqOl6NUmKgweT7mHZu4jTEQBl8Cl2VljQFhITpMT2pXY+6iAG9v1do=]"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    ro:
+      url: jdbc:mysql://ex-db-bbserver-ro:3306/bb_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
+      username: prod_bbserver
+      password: "TB-ENC[Xb743ncnfh8mvMbOnScyRSlLcwYE5YgUKf/SZHqFlHO4dH+UvbigZbmFu9pz3fHGVkn5gqEKHZ/rILd/KwE5LvpxPjdujpjmH8U0ZhrLNo/K+l8iu1ankFqOl6NUmKgweT7mHZu4jTEQBl8Cl2VljQFhITpMT2pXY+6iAG9v1do=]"
+    gateway:
+      jdbc-url: jdbc:mysql://ex-db-trade:3306/gateway_exchange?serverTimezone=UTC&characterEncoding=utf8&useUnicode=true&useSSL=false
+      username: prod_gateway_exchange
+      password: "TB-ENC[DydgwVJqQbEAsMQFrd73xSA5vL4HRVFiA3Bvz/GijWOxXorNywCXrCT2dNdvmQDxfL55hJhQgTg3Aqh3ZGj5qekgRTs45Pct/HsfvfUN0p01m3PaU8ZNr9Q0vn09aq79JBrm8Zcn7OBXn6YZI1QRiYwNR0euKD8U5ia7i6wDeTE=]"
+    offlineserver:
+      hikari:
+        jdbc-url: jdbc:mysql://ex-db-offline:3306/offline_server?characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+        username: offline
+        password: 2TZhNFhksCTYLkDh
+        minimum-idle: 4
+        maximum-pool-size: 20
+  tracing:
+    enableTracing: false
+    reporter.zipkin.url: http://127.0.0.1:9411/api/v2/spans
+
+grpc:
+  port: 7011
+  shortcuts:
+    bb-server: localhost:7011
+  client-worker-count: 20
+  server-worker-count: 100
+  channel-check-mode: 1
+  healthy-check-interval-in-sec: 1
+  wait-time-in-sec-to-kill-channel: 1
+
+
+server:
+  port: 7010
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-statement-timeout: 3
+
+bb:
+  redis-cluster:
+    shards:
+      - ex-redis:6379
+  grpc-client:
+    list:
+      - name: quoteChannel
+        host: quote-service-bdfd5d
+        port: 7063
+      - name: rcChannel
+        host: exrc-1f0c38
+        port: 7260
+      - name: commonServiceChannel
+        host: bbex-common-service-72e5fb
+        port: 7220
+      - name: newWalletChannel
+        host: wallet-gateway-9b36a6
+        port: 7016
+      - name: bbServerChannel
+        host: bb-server-f22d4a
+        port: 7011
+      - name: voucher-server
+        host: voucher-hig90n
+        port: 7225
+  location: bitbili
+
+env:
+  # env of running: prod|test|benchmark
+  profile: test
+
+has:
+  zkAddress: 10.22.4.148:2181,10.22.4.170:2181,10.22.4.18:2181
+  useZkClient: true
+  useGrpcChannels: false
+  useMatchChannels: true
+
+scheduling:
+  ColdWallet: true
+  Convert: true
+  ErrorOrderTicketSettleHandler: true
+  FundingRateRefresh: true
+  FuturesSettlement: true
+  OptionSettlement: true
+  OrderSwitch: true
+  ErrorShardMarginHandler: true
+
+system-users:
+  market-maker: 4000015
+  fund-holder: 944128469,271547390
+# nacos-config
+nacos:
+  config:
+    server-addr: nacos.prod.infra.be2pzzl3bhmz.tbinner.com:8848
+    username: nacos
+    password: c7crN7*ad7&GGN&l
+    ext-config:
+      - data-id: biz.yaml
+        group: cross-biz
+        auto-refresh: true
+        server-addr: nacos.prod.infra.be2pzzl3bhmz.tbinner.com:8848
+        type: yaml
+        username: nacos
+        password: c7crN7*ad7&GGN&l
+
+larkAlert:
+  fundingRateCheckWebhook: https://open.larksuite.com/open-apis/bot/v2/hook/b16118a3-f588-48bf-89b0-e77b9ea788fb
+  slippageRateWebhook: https://open.larksuite.com/open-apis/bot/v2/hook/fff8a677-eae3-42c5-81f9-2251efc525d5
+sentinel:
+  rule:
+    flowLimitMap: {
+      "[io.bbex.base.account.OrderService/BatchCancelByIds]":{"grade":1,"count":2400,"limitApp":"market-maker"},
+    }
